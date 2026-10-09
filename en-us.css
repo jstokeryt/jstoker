@@ -1,0 +1,109 @@
+/* Global Styles */
+body {
+    background-color: black;
+    font-family: Arial, Helvetica, sans-serif; /* Set globally once */
+    cursor: url('/cursor/default.png'), auto;
+    width: vh;
+}
+html {
+  scroll-behavior: smooth;
+  width: vh;
+}
+p {
+    color: white;
+    font-size: 20px;
+}
+a {
+    color: white;
+    cursor: url('/cursor/default.png'), auto;
+}
+h1, h2, h3 {
+    color: white;
+}
+header, footer {
+    background-color: navy;
+}
+
+/* Layout Containers */
+.info-container {
+    margin: 20px 0;
+}
+
+/* Typography Overrides */
+.title {
+    color: lightskyblue;
+}
+.subtitle {
+    color: lightpink;
+}
+.noscript-warning {
+    font-size: 24px;
+    color: red;
+    font-weight: bold;
+    text-align: center;
+    margin-top: 50px;
+}
+
+/* Alert Styling */
+.alert {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    background-color: #1a1a2e; /* Muted dark blue to accent the background */
+    border-bottom: 1px solid #00e676; /* Accent border color line */
+    padding: 10px 20px;
+    font-family: sans-serif;
+    color: #ffffff;
+    cursor: url('/cursor/default.png'), auto;
+    width: vh;
+}
+
+.alert a {
+    color: #00e676;
+    text-decoration: underline;
+    margin-left: 10px;
+    cursor: url('/cursor/default.png'), auto;
+}
+
+.alert-close {
+    background: none;
+    border: none;
+    color: #ffffff;
+    font-size: 20px;
+    cursor: url('/cursor/default.png'), auto;
+    opacity: 0.7;
+}
+
+.alert-close:hover {
+    opacity: 1;
+}
+
+button {
+    cursor: url('/cursor/default.png'), auto;
+}
+
+
+/* Shared Divider Styles */
+.top-divider, .other-divider, .bottom-divider {
+    border: none;
+    height: 4px;
+    margin: 20px auto;
+}
+
+/* Unique Divider Overrides */
+.top-divider {
+    background-color: lightgreen;
+    width: 50%;  
+}
+.other-divider {
+    background-color: lightskyblue;
+    width: 50%;
+}
+.bottom-divider {
+    background-color: lightgreen;
+    width: 75%;
+}
+
+
+
+
