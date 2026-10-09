@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en"><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scientific Calculator - Shortcut Pro</title>
+    <style>
+        :root {
+            --bg-color: #1a1a2e;
+            --calc-bg: #16213e;
+            --display-bg: #0f3460;
+            --text-color: #e94560;
+            --second-color: #2ecc71;
+            --history-text: rgba(233, 69, 96, 0.5);
+            --btn-bg: #533483;
+            --btn-text: #ffffff;
+            --op-color: #e94560;
+            --nav-bg: #2c3e50;
+        }
+
+        body {
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            height: 100vh; margin: 0; background-color: var(--bg-color);
+            font-family: 'Segoe UI', sans-serif; overflow: hidden;
+        }
+
+        .calculator { width: 380px; background-color: var(--calc-bg); padding: 25px; border-radius: 30px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+
+        #screen-container {
+            width: 100%; height: 140px; margin-bottom: 20px; padding: 10px 15px; box-sizing: border-box;
+            background: var(--display-bg); border-radius: 15px;
+            display: flex; flex-direction: column; justify-content: flex-end;
+            box-shadow: inset 0 2px 10px rgba(0,0,0,0.2); position: relative;
+        }
+
+        #second-indicator {
+            position: absolute; top: 8px; left: 15px; font-size: 0.7rem; font-weight: bold;
+            color: var(--second-color); opacity: 0; transition: 0.2s;
+        }
+        #second-indicator.active { opacity: 1; }
+
+        .hist-line { font-size: 0.85rem; color: var(--history-text); text-align: right; min-height: 1.2rem; }
+        #active-line { font-size: 1.1rem; color: var(--text-color); text-align: right; margin-top: 5px; min-height: 1.5rem; white-space: pre-wrap;}
+        .cursor { font-weight: bold; animation: blink 1s step-end infinite; color: var(--text-color); }
+        @keyframes blink { from, to { opacity: 1; } 50% { opacity: 0; } }
+
+        .controls-top { display: grid; grid-template-columns: 1.2fr 1fr; gap: 15px; margin-bottom: 15px; }
+        .sys-keys { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+
+        .arrow-cluster {
+            display: grid;
+            grid-template-areas: 
+                ". up ."
+                "left down right";
+            gap: 5px;
+            justify-content: center;
+        }
+
+        button { 
+            padding: 12px; font-size: 0.9rem; border: none; border-radius: 8px; cursor: pointer; 
+            background: var(--btn-bg); color: var(--btn-text); transition: 0.1s; position: relative;
+        }
+        button:active { transform: scale(0.92); }
+
+        .nav-btn { background: var(--nav-bg); font-weight: bold; width: 45px; height: 38px; }
+        .up { grid-area: up; } .left { grid-area: left; } .down { grid-area: down; } .right { grid-area: right; }
+
+        .btn-2nd-active { background: var(--second-color) !important; color: white; }
+        .sub-label { position: absolute; top: 2px; left: 4px; font-size: 0.55rem; color: var(--second-color); font-weight: bold; }
+
+        .main-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+        .operator { background: var(--op-color); }
+        .equal { background: #2ecc71; grid-column: span 4; margin-top: 5px; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <div class="calculator">
+        <div id="screen-container">
+            <div id="second-indicator" class="">2nd</div>
+            <div id="hist-2" class="hist-line"></div>
+            <div id="hist-1" class="hist-line"></div>
+            <div id="active-line"><span class="cursor">_</span></div>
+        </div>
+        
+        <div class="controls-top">
+            <div class="sys-keys">
+                <button id="btn-2nd" onclick="toggle2nd()" data-key="alt" class="">2nd</button>
+                <button onclick="clearEntry()" data-key="ce">CLEAR</button>
+                <button class="operator" onclick="backspaceAtCursor()" data-key="backspace"><span class="sub-label">CLR</span>DEL</button>
+                <button style="background: #ff4b2b;" onclick="nuclearWipe()"><span class="sub-label">BYP</span>WIPE</button>
+            </div>
+
+            <div class="arrow-cluster">
+                <button class="nav-btn up" onclick="navigateHistory(1)" data-key="arrowup">▲</button>
+                <button class="nav-btn left" onclick="moveCursor(-1)" data-key="arrowleft">◀</button>
+                <button class="nav-btn down" onclick="navigateHistory(-1)" data-key="arrowdown">▼</button>
+                <button class="nav-btn right" onclick="moveCursor(1)" data-key="arrowright">▶</button>
+            </div>
+        </div>
+
+        <div class="main-grid">
+            <button onclick="wrapChar('sqr')" data-key="^"><span class="sub-label">cbe</span>x²</button>
+            <button onclick="wrapChar('sqrt')" data-key="\"><span class="sub-label">cbrt</span>√</button>
+            <button onclick="handleInput('(')">(</button>
+            <button onclick="handleInput(')')">)</button>
+            
+            <button onclick="handleInput('7')">7</button>
+            <button onclick="handleInput('8')">8</button>
+            <button onclick="handleInput('9')">9</button>
+            <button class="operator" onclick="handleInput('/')">÷</button>
+            
+            <button onclick="handleInput('4')" data-key="4"><span class="sub-label">ln</span>4</button>
+            <button onclick="handleInput('5')" data-key="5"><span class="sub-label">log</span>5</button>
+            <button onclick="handleInput('6')">6</button>
+            <button class="operator" onclick="handleInput('*')">×</button>
+            
+            <button onclick="handleInput('1')">1</button>
+            <button onclick="handleInput('2')">2</button>
+            <button onclick="handleInput('3')">3</button>
+            <button class="operator" onclick="handleInput('-')">−</button>
+            
+            <button onclick="handleInput('0')">0</button>
+            <button onclick="handleInput('.')">.</button>
+            <button onclick="handleInput('π')">π</button>
+            <button class="operator" onclick="handleInput('+')">+</button>
+
+            <button class="equal" onclick="runCalc()" data-key="enter">ENTER (=)</button>
+        </div>
+    </div>
+
+    <script>
+        let inputStr = "";
+        let cursorIdx = 0;
+        let history = JSON.parse(localStorage.getItem('calcHistory')) || [];
+        let historyIdx = -1;
+        let is2ndActive = false;
+
+        const activeLine = document.getElementById('active-line');
+        const secondInd = document.getElementById('second-indicator');
+        const secondBtn = document.getElementById('btn-2nd');
+
+        function updateDisplay() {
+            let before = inputStr.slice(0, cursorIdx);
+            let after = inputStr.slice(cursorIdx);
+            activeLine.innerHTML = (before + '<span class="cursor">_</span>' + after) || '<span class="cursor">_</span>';
+            
+            let offset = (historyIdx === -1) ? 0 : historyIdx;
+            document.getElementById('hist-1').innerText = history[offset] || "";
+            document.getElementById('hist-2').innerText = history[offset+1] || "";
+
+            secondInd.className = is2ndActive ? "active" : "";
+            secondBtn.className = is2ndActive ? "btn-2nd-active" : "";
+        }
+
+        function toggle2nd() { is2ndActive = !is2ndActive; updateDisplay(); }
+
+        function handleInput(char) {
+            let toAdd = char;
+            if (is2ndActive) {
+                if (char === '4') toAdd = "ln(";
+                else if (char === '5') toAdd = "log(";
+                else if (char === '6') {
+                    is2ndActive = false;
+                    wrapChar('cbe'); 
+                    return; 
+                }
+                else if (char === 'c') {
+                    is2ndActive = true; // Set to true so nuclearWipe knows to bypass
+                    nuclearWipe();
+                    return;
+                }
+                is2ndActive = false;
+            }
+            
+            // Prevent 'c' from being typed if it was meant as a shortcut
+            if (char === 'c') return;
+
+            inputStr = inputStr.slice(0, cursorIdx) + toAdd + inputStr.slice(cursorIdx);
+            cursorIdx += toAdd.length;
+            updateDisplay();
+        }
+
+        function wrapChar(type) {
+            let finalType = type;
+            if (is2ndActive) {
+                if (type === 'sqr') finalType = 'cbe';
+                else if (type === 'sqrt') finalType = 'cbrt';
+                is2ndActive = false;
+            }
+            
+            if (inputStr === "") {
+                inputStr = finalType + "(";
+            } else {
+                inputStr = `${finalType}(${inputStr})`;
+            }
+            cursorIdx = inputStr.length;
+            updateDisplay();
+        }
+
+        function moveCursor(dir) {
+            cursorIdx = Math.max(0, Math.min(inputStr.length, cursorIdx + dir));
+            updateDisplay();
+        }
+
+        function navigateHistory(dir) {
+            if (history.length === 0) return;
+            historyIdx = Math.max(-1, Math.min(history.length - 1, historyIdx + dir));
+            inputStr = (historyIdx === -1) ? "" : history[historyIdx].split('=')[0];
+            cursorIdx = inputStr.length;
+            updateDisplay();
+        }
+
+        function backspaceAtCursor() {
+            if (is2ndActive) { 
+                clearEntry(); 
+                is2ndActive = false; 
+            } else if (cursorIdx > 0) {
+                const before = inputStr.slice(0, cursorIdx);
+                const checks = ["sqrt(", "sqr(", "cbrt(", "cbe(", "log(", "ln("];
+                let deletedCount = 1;
+                
+                for (let c of checks) {
+                    if (before.endsWith(c)) {
+                        deletedCount = c.length;
+                        break;
+                    }
+                }
+                
+                inputStr = inputStr.slice(0, cursorIdx - deletedCount) + inputStr.slice(cursorIdx);
+                cursorIdx -= deletedCount;
+            }
+            updateDisplay();
+        }
+
+        function clearEntry() { inputStr = ""; cursorIdx = 0; updateDisplay(); }
+
+        function nuclearWipe(forceBypass = false) { 
+            // Bypass if 2nd is active OR explicitly forced
+            if (is2ndActive || forceBypass) {
+                localStorage.removeItem('calcHistory'); 
+                history = []; 
+                clearEntry();
+                is2ndActive = false;
+            } else {
+                if (confirm("Delete all history?")) {
+                    localStorage.removeItem('calcHistory'); 
+                    history = []; 
+                    clearEntry();
+                }
+            }
+            updateDisplay();
+        }
+
+        function runCalc() {
+            try {
+                let expr = inputStr;
+                let opens = (expr.match(/\(/g) || []).length;
+                let closes = (expr.match(/\)/g) || []).length;
+                while (opens > closes) { expr += ")"; closes++; }
+
+                let evalExpr = expr.replace(/π/g, 'Math.PI')
+                                   .replace(/sqr\((.*?)\)/g, 'Math.pow($1,2)')
+                                   .replace(/cbe\((.*?)\)/g, 'Math.pow($1,3)')
+                                   .replace(/sqrt\((.*?)\)/g, 'Math.sqrt($1)')
+                                   .replace(/cbrt\((.*?)\)/g, 'Math.cbrt($1)')
+                                   .replace(/log\((.*?)\)/g, 'Math.log10($1)')
+                                   .replace(/ln\((.*?)\)/g, 'Math.log($1)');
+                
+                let result = eval(evalExpr);
+                history.unshift(`${inputStr}=${result}`);
+                inputStr = result.toString();
+                cursorIdx = inputStr.length;
+                updateDisplay();
+            } catch(e) { 
+                activeLine.innerText = "Syntax Error"; 
+                setTimeout(updateDisplay, 1000); 
+            }
+        }
+
+        document.addEventListener('keydown', (e) => {
+            const key = e.key.toLowerCase();
+            
+            // Alt + C = Silent Wipe
+            if (e.altKey && key === 'c') {
+                e.preventDefault();
+                is2ndActive = true; 
+                nuclearWipe();
+                return;
+            }
+
+            // Ctrl + C = Prompted Wipe
+            if (e.ctrlKey && key === 'c') {
+                e.preventDefault();
+                is2ndActive = false;
+                nuclearWipe();
+                return;
+            }
+
+            if (key === 'alt') { e.preventDefault(); toggle2nd(); }
+            else if (key === 'arrowleft') { e.preventDefault(); moveCursor(-1); }
+            else if (key === 'arrowright') { e.preventDefault(); moveCursor(1); }
+            else if (key === 'arrowup') { e.preventDefault(); navigateHistory(1); }
+            else if (key === 'arrowdown') { e.preventDefault(); navigateHistory(-1); }
+            else if (key === 'backspace') { e.preventDefault(); backspaceAtCursor(); }
+            else if (key === 'enter') { e.preventDefault(); runCalc(); }
+            else if (key === '^') { e.preventDefault(); wrapChar('sqr'); }
+            else if (key === '\\') { e.preventDefault(); wrapChar('sqrt'); }
+            else if (/[0-9]/.test(key) || ['+', '-', '*', '/', '.', '(', ')'].includes(key)) {
+                handleInput(key);
+            }
+        });
+
+        window.onload = updateDisplay;
+    </script>
+
+</body></html>
