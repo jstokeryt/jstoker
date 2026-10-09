@@ -1,0 +1,8 @@
+.centered {
+    text-align: center;
+}
+.centered-text {
+    display: flex;
+    flex-direction: column; /* Stacks items vertically */
+    align-items: center;    /* Centers items horizontally in column mode */
+}
